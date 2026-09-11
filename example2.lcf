@@ -1,0 +1,210 @@
+# Loon 示例配置
+# 更新日期：2026.09.11
+# 作者：Loon
+# 具体语法和文档参考：https://nsloon.app/docs/Node/
+# 本文件中的域名、账号、密码和密钥仅用于演示，使用前请替换为真实信息。
+# 段名属于配置语法，所有语言版本都必须使用英文段名。
+# 旧 Rewrite 和 Script 语法仍可兼容读取；新建配置请使用本文件展示的表达式语法。
+
+[General]
+# 指定不经过系统 HTTP/SOCKS 代理的局域网地址和域名。
+skip-proxy = 192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,localhost,*.local
+# 指定绕过 TUN 虚拟网卡的保留地址和局域网地址。
+bypass-tun = 10.0.0.0/8,100.64.0.0/10,127.0.0.0/8,169.254.0.0/16,172.16.0.0/12,192.0.0.0/24,192.0.2.0/24,192.88.99.0/24,192.168.0.0/16,198.51.100.0/24,203.0.113.0/24,224.0.0.0/4,255.255.255.255/32
+# 配置传统 DNS；system 表示同时使用系统 DNS，IPv6 地址带端口时必须使用方括号。
+dns-server = system,223.5.5.5,[2001:4860:4860::8888]:53
+# 配置 DNS over HTTPS，多个地址使用英文逗号分隔。
+doh-server = https://dns.alidns.com/dns-query
+# 配置 DNS over QUIC，地址必须以 quic:// 开头，默认端口为 784。
+doq-server = quic://dns.adguard-dns.com:784
+# 配置 DNS over HTTP/3，可使用 h3:// 或 HTTPS URL。
+doh3-server = h3://dns.google/dns-query
+# 劫持发往任意服务器 53 端口的 DNS 请求并交给 Loon 处理。
+hijack-dns = *:53
+# 设置默认 IP 栈；可选 v4-only、dual、prefer-v4、prefer-v6、v6-only。
+ip-mode = dual
+# 设置 IPv6 虚拟接口模式；可选 off、auto、always。
+ipv6-vif = auto
+# 是否允许局域网设备访问 Loon 的 HTTP/SOCKS5 服务。
+allow-wifi-access = false
+# 设置局域网 HTTP 代理服务端口。
+wifi-access-http-port = 7222
+# 设置局域网 SOCKS5 代理服务端口。
+wifi-access-socks5-port = 7221
+# 是否允许通过局域网代理访问 MITM 功能。
+mitm-on-wifi-access = false
+# 设置代理节点延迟测试 URL。
+proxy-test-url = http://bing.com/generate_204
+# 设置直连网络可用性测试 URL。
+internet-test-url = http://wifi.vivo.com.cn/generate_204
+# 设置节点测试超时时间，单位为秒。
+test-timeout = 5
+# 设置订阅资源解析器脚本 URL；目前推荐使用插件的方式进行资源解析增强。
+resource-parser = https://example.com/resource-parser.js
+# 按网络环境切换运行模式；键必须使用双引号，值可为 direct、rule、proxy。
+ssid-trigger = "default":rule, "cellular":rule, "Example Wi-Fi":direct
+# 下列域名不使用 Fake IP 映射。
+real-ip = *.apple.com,*.icloud.com
+# 设置出站接口选择模式；可选 auto、cellular、performance、balance。
+interface-mode = auto
+# 是否阻止 STUN 流量。
+disable-stun = false
+# 设置自定义 GeoIP 数据库下载地址，文件应为 MaxMind MMDB 格式。
+geoip-url = https://gitlab.com/Loon0x00/loon_data/-/raw/main/geo/GeoLite2-Country.mmdb?inline=false
+# 设置自定义 IP-ASN 数据库下载地址，文件应为 MaxMind MMDB 格式。
+ipasn-url = https://gitlab.com/Loon0x00/loon_data/-/raw/main/geo/GeoLite2-ASN.mmdb?inline=false
+# 策略变化后是否断开已有连接，使新策略立即生效。
+disconnect-on-policy-change = false
+# 当请求目标是 IP 时，是否通过 TLS SNI 辅助域名分流。
+sni-sniffing = true
+# 设置域名 REJECT 的执行阶段；可选 DNS、Request。
+domain-reject-mode = DNS
+# 设置 DNS 阶段 REJECT 的返回方式；可选 LoopbackIP、NoAnswer、NXDomain。
+dns-reject-mode = NoAnswer
+# UDP 未匹配到可用代理能力时的回退方式；可选 REJECT、DIRECT。
+udp-fallback-mode = DIRECT
+
+[Proxy]
+# 内置策略包括 DIRECT、REJECT；内置 PROXY 自动指向一个可用节点。
+# 标准 Shadowsocks 节点；block-quic 控制是否阻止该节点承载 QUIC。
+SS = Shadowsocks,example.com,8388,aes-128-gcm,"password",fast-open=false,udp=true,block-quic=true
+# Shadowsocks simple-obfs 节点；obfs-name 可为 http 或 tls。
+SS-Obfs = Shadowsocks,example.com,443,aes-128-gcm,"password",obfs-name=tls,obfs-host=www.microsoft.com,fast-open=true,udp=true,block-quic=true
+# Shadowsocks 2022 + ShadowTLS v3 节点；udp-over-tcp 用于在 TCP 通道中承载 UDP。
+SS-ShadowTLS = Shadowsocks,example.com,443,2022-blake3-aes-128-gcm,"MDEyMzQ1Njc4OWFiY2RlZg==",shadow-tls-password=shadow-password,shadow-tls-sni=www.apple.com,shadow-tls-version=3,udp-port=8389,fast-open=false,udp=true,block-quic=false,udp-over-tcp=true
+# ShadowsocksR 节点；protocol 和 obfs 必须使用服务端对应值。
+SSR = ShadowsocksR,example.com,8389,aes-256-cfb,"password",protocol=auth_aes128_sha1,protocol-param=1000:password,obfs=tls1.2_ticket_auth,obfs-param=www.microsoft.com,fast-open=false,udp=true,block-quic=true
+# 带账号密码的 HTTP 代理节点。
+HTTP = HTTP,example.com,8080,username,"password",always-use-connect=true,ip-mode=dual
+# HTTPS 代理节点；tls-profile 可为 global、safari-ios18、safari-ios-26、chrome、chrome147、default。
+HTTPS = HTTPS,example.com,443,username,"password",sni=example.com,skip-cert-verify=false,tls-profile=safari-ios-26,ip-mode=dual
+# SOCKS5 代理节点；udp=true 表示启用 SOCKS5 UDP ASSOCIATE。
+SOCKS5 = SOCKS5,example.com,1080,username,"password",udp=true,block-quic=true,ip-mode=dual
+# VMess WebSocket + TLS 节点；alterId=0 使用 VMess AEAD。
+VMess = VMess,example.com,443,aes-128-gcm,"52396e06-041a-4cc2-be5c-8525eb457809",transport=ws,alterId=0,path=/ws,host=cdn.example.com,udp=true,block-quic=true,over-tls=true,sni=example.com,tls-profile=safari-ios-26
+# VLESS WebSocket + TLS 节点。
+VLESS = VLESS,example.com,443,"52396e06-041a-4cc2-be5c-8525eb457809",transport=ws,path=/ws,host=cdn.example.com,udp=true,block-quic=true,over-tls=true,sni=example.com,tls-profile=safari-ios-26
+# VLESS Vision + Reality 节点；public-key 和 short-id 由 Reality 服务端提供。
+VLESS-Reality = VLESS,example.com,443,"52396e06-041a-4cc2-be5c-8525eb457809",transport=tcp,flow=xtls-rprx-vision,public-key="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",short-id=0123456789abcdef,udp=true,block-quic=false,over-tls=true,sni=www.apple.com,tls-profile=safari-ios-26
+# Trojan WebSocket 节点；path 和 host 对应 WebSocket 握手参数。
+Trojan = Trojan,example.com,443,"password",transport=ws,path=/ws,host=cdn.example.com,sni=example.com,skip-cert-verify=false,tls-profile=chrome,udp=true,block-quic=true
+# WireGuard 节点；keepalive 为保活秒数，peers 数组可包含多个 Peer。
+WireGuard = WireGuard,interface-ip=192.0.2.2,interface-ipv6=2001:db8::2,private-key="qF22B3ezOhWGJA4SHwQSsgMa9d6mPGHyFdZMaDTae2E=",mtu=1280,dns=192.0.2.1,dnsv6=2001:db8::1,keepalive=45,peers=[{public-key="JFuTIJEcFnt8R04UnAE5o2WfIPJUsumSxsD2ayXzoWY=",preshared-key="yVNv5K05AwVnWaR4OB8BlMX3jJlkS74aKlYC3PD95IE=",allowed-ips="0.0.0.0/0,::/0",endpoint=example.com:51820}],udp=true
+# Hysteria2 节点；支持 Salamander 混淆、端口跳跃、带宽提示和 UDP。
+Hysteria2 = Hysteria2,example.com,443,"password",sni=example.com,skip-cert-verify=false,fast-open=true,salamander-password=obfs-password,server-ports="443,8443-8450",hop-interval=30,alpn="h3",udp=true,block-quic=false,download-bandwidth=100,ip-mode=dual
+# AnyTLS 节点；idle-session-timeout 和 max-stream-count 控制会话复用，public-key/short-id 用于 Reality。
+AnyTLS = AnyTLS,example.com,443,"password",sni=www.apple.com,public-key="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",short-id=0123456789abcdef,tls-profile=chrome147,idle-session-timeout=30,max-stream-count=8,udp=true,block-quic=false,ip-mode=dual
+# JavaScript 自定义协议节点；script-path 指向自定义协议脚本。
+Custom = Custom,192.0.2.10,6152,script-path=custom-protocol.js,ip-mode=dual
+
+[Remote Proxy]
+# 节点订阅；开关支持 true、false、default，enabled=false 可保留示例但不下载资源。
+Subs = https://example.com/subscription.txt,udp=default,block-quic=true,fast-open=default,vmess-aead=true,skip-cert-verify=default,flexible-sni=false,enabled=false
+
+[Remote Filter]
+# 在 Subs 中使用 UI 手动选择节点。
+Selected = NodeSelect,Subs
+# 在 Subs 中筛选名称包含 HK 的节点。
+HK-Keyword = NameKeyword,Subs,FilterKey="HK"
+# 在 Subs 中使用不区分大小写的正则筛选香港节点。
+HK = NameRegex,Subs,FilterKey="(?i)(HK|Hong Kong|香港)"
+
+[Proxy Group]
+# 手动选择策略组；可引用本地节点、订阅、过滤器和其他策略组。
+PROXY = select,Auto,Fallback,LoadBalance,SS,VLESS-Reality,Hysteria2,AnyTLS,Subs,HK,DIRECT,img-url=network.system,img-bg-color=#1E90FF
+# 自动测速组；tolerance 表示切换节点所需的最小延迟差，单位为毫秒。
+Auto = url-test,SS,VMess,VLESS,Trojan,Hysteria2,AnyTLS,Subs,url=http://bing.com/generate_204,interval=600,tolerance=50
+# 故障转移组；按顺序选择第一个可用节点，max-timeout 单位为毫秒。
+Fallback = fallback,SS,VMess,VLESS,Trojan,Subs,url=http://bing.com/generate_204,interval=600,max-timeout=3000
+# SSID 策略组；default、cellular 和 SSID 名称分别指定对应网络策略。
+SSID = ssid,default=PROXY,cellular=DIRECT,"Example Wi-Fi"=DIRECT
+# 负载均衡组；algorithm 可为 random、pcc、round-robin。
+LoadBalance = load-balance,SS,VMess,VLESS,Trojan,Subs,url=http://bing.com/generate_204,interval=600,algorithm=pcc,max-timeout=3000
+# 广告处理策略组。
+Advertising = select,REJECT,DIRECT
+# FINAL 规则使用的最终策略组。
+Final = select,PROXY,DIRECT
+
+[Proxy Chain]
+# 代理链按从左到右的顺序连接，udp=true 表示允许 UDP 通过代理链。
+Chain = SS,HTTPS,udp=true
+
+[Rule]
+# 域名后缀规则。
+DOMAIN-SUFFIX,example.com,PROXY
+# IPv4 CIDR 规则；no-resolve 表示匹配时不主动进行 DNS 解析。
+IP-CIDR,192.0.2.0/24,DIRECT,no-resolve
+# IP-ASN 规则；13335 仅作为语法示例。
+IP-ASN,13335,PROXY,no-resolve
+# 目标端口规则，也支持单个端口或端口范围。
+DEST-PORT,443,PROXY
+# 协议规则；可匹配 HTTP、HTTPS、TCP、QUIC、STUN、UDP。
+PROTOCOL,QUIC,REJECT
+# 逻辑规则；AND、OR、NOT 可嵌套组合子规则。
+AND,((PROTOCOL,UDP),(DEST-PORT,443)),REJECT
+# 最终规则必须放在规则列表末尾。
+FINAL,Final
+
+[Remote Rule]
+# 远程规则订阅；policy 指定策略，tag 指定显示名称。
+https://raw.githubusercontent.com/Loon0x00/LoonExampleConfig/master/Rule/ExampleRule.lsr,policy=PROXY,tag=Example,enabled=true
+# 中国大陆直连规则订阅。
+https://raw.githubusercontent.com/Loon0x00/LoonLiteRules/main/direct/cn.list,policy=DIRECT,tag=GEOIP_CN,enabled=true
+
+[Rewrite]
+# 使用命名捕获组将 HTTP URL 重定向到 HTTPS；redirect 支持 302 和 307。
+request if ${url} ~= /^http:\/\/example\.com(\/.*)$/ as url_match then redirect(302, "https://example.com${url_match.1}")
+# 同时匹配 URL、请求方法并连续修改多个请求 Header。
+request if ${url} ~= /^https:\/\/api\.example\.com\// && ${request.method} == "POST" then request.header.set("X-Loon", "true") | request.header.del("X-Legacy")
+# 命中广告请求时直接返回空字典响应。
+request if ${url} ~= /^https:\/\/ads\.example\.com\// then reject_dict(200)
+# 响应阶段可组合状态码、Header 条件并修改 JSON Body。
+response if ${url} ~= /^https:\/\/api\.example\.com\// && ${response.status} == 200 && ${response.header['Content-Type']} ~= /^application\/json/i then response.json.replace("data.enabled", true) | response.json.delete("data.ads")
+# 使用 Raw String 构造 JSON Mock 响应，并同时设置响应 Header。
+response if ${url} ~= /^https:\/\/mock\.example\.com\// then response.body.mock("json", `{"code":0,"message":"ok"}`, 200) | response.header.set("Cache-Control", "no-store")
+
+[Host]
+# 将域名映射到固定 IP。
+fixed.example.com = 192.0.2.20
+# 将域名映射到另一个域名；use-in-proxy=true 表示代理连接也使用该映射。
+alias.example.com = origin.example.com,use-in-proxy=true
+# 为指定域名选择传统 DNS 服务器。
+dns.example.com = server:223.5.5.5
+# 为指定域名选择 DoH 服务器。
+doh.example.com = server:https://dns.alidns.com/dns-query
+# 为指定域名设置独立 IP 栈模式。
+ipv6.example.com = ip-mode:prefer-v6
+# 为指定 SSID 选择 DNS 服务器。
+ssid:Example Wi-Fi = server:system
+# 将目标 IP 映射到另一个 IP。
+192.0.2.10 = 192.0.2.20
+
+[Script]
+# Request Script：条件支持 URL、Method、Header 和逻辑组合，第二个 script 参数会传入 $argument。
+request if ${url} ~= /^https:\/\/api\.example\.com\// && ${request.method} == "POST" then script("request.js", "mode=preview") with tag="Request Example", timeout=20, requires_body=true
+# Response Script：必须包含 URL Guard，可继续匹配原始状态码和响应 Header。
+response if ${url} ~= /^https:\/\/api\.example\.com\// && ${response.status} == 200 && ${response.header['Content-Type']} ~= /^application\/json/i then script("response.js") with tag="Response Example", timeout=20, requires_body=true, binary_body_mode=true
+# Cron Script：支持五段或六段 Cron 表达式；此示例默认关闭。
+cron "0 8 * * *" then script("cron.js") with enable=false, tag="Daily Example", timeout=300
+# Network Changed Script：网络变化时触发；此示例默认关闭。
+network-changed then script("https://raw.githubusercontent.com/Loon0x00/LoonExampleConfig/master/Script/netChanged.js") with enable=false, tag="Network Changed", timeout=30
+# Generic Script：可从节点或策略组操作中运行，img_url 使用下划线命名；此示例默认关闭。
+generic then script("https://raw.githubusercontent.com/Loon0x00/LoonExampleConfig/master/Script/generic_example.js", `{"action":"locate"}`) with enable=false, tag="Geo Location", img_url="location.fill.viewfinder.system", timeout=30
+
+[Remote Script]
+# Script 订阅；远程文件中的每一行也应使用新的 Script 表达式语法。
+https://example.com/scripts.list,tag=ExampleScripts,enabled=false
+
+[Plugin]
+# 插件配置；policy 指定插件中 PROXY 的映射策略，pin=true 固定当前插件版本。
+https://raw.githubusercontent.com/Loon0x00/LoonExampleConfig/refs/heads/master/Plugin/NewPlugin/Plugin_Example2.lpx,policy=PROXY,tag=ExamplePlugin,pin=false,enabled=false
+
+[MITM]
+# 指定需要 MITM 的域名；前缀 - 表示排除域名。
+hostname = *.example.com,-excluded.example.com
+# 是否跳过上游服务器证书校验；建议保持 false。
+skip-server-cert-verify = false
+# 可选：PKCS#12 证书的 Base64 内容，未配置时由 Loon 管理证书。
+# ca-p12 = <base64-p12>
+# 可选：上面 PKCS#12 证书的密码。
+# ca-passphrase = <p12-password>
