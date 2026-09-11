@@ -1,0 +1,26 @@
+# 新语法版本：Loon build 988 及以上；由 Plugin_Arg.plugin 转换。
+#!name = 带参数的插件Demo
+#!desc = 这是一个可设定参数的插件，新语法适用于 Loon build 988 及以上版本
+#!author = Loon0x00[https://github.com/Loon0x00/LoonExampleConfig]
+#!homePage = https://nsloon.com
+#!data = 2024-08-09
+#!icon = https://raw.githubusercontent.com/Loon0x00/Loon0x00.github.io/main/static/img/loon.png
+#!system = ios,tvos,macos
+#!system_version = 300
+#!loon_version = 3.5.1(988)
+#!tag = 官方,Demo
+
+[Argument]
+appName = input,"Loon",tag=app的名字,desc=填写app的用户名，用于提交app的相关信息
+appCategory = select,"Tool","Video&Photo","Game",tag=app的分类
+isSupportChinese = switch,true,tag=是否支持中文,desc=选择app是否支持中文
+cron = input,"*/5 * * * *",tag=定时任务时间,desc=定时任务的cron表达式
+cookieScriptEnable = switch,true,tag=是否启用获取cookie的脚本
+
+[Script]
+request if ${url} ~= /^https:\/\/nsloon\.app/i then script("https://raw.githubusercontent.com/Loon0x00/LoonExampleConfig/master/Script/plugin_arg.js", {${appName}, ${appCategory}, ${isSupportChinese}}) with tag="plugin_arg_demo_request", enable=${cookieScriptEnable}
+
+cron ${cron} then script("https://raw.githubusercontent.com/Loon0x00/LoonExampleConfig/master/Script/cron.js", {${appName}}) with tag="cronExample", enable=true
+
+[MITM]
+hostname = nsloon.app

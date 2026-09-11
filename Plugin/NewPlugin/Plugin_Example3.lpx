@@ -1,0 +1,4 @@
+# 新语法版本：Loon build 988 及以上；由 Plugin_Example3.plugin 转换。
+#!name = plugin example3
+[Script]
+generic then script("https://raw.githubusercontent.com/Loon0x00/LoonExampleConfig/master/Script/generic_example.js") with tag="GeoLocation", timeout=10, img_url="location.fill.viewfinder.system"

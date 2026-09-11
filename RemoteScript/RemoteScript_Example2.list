@@ -1,0 +1,28 @@
+# Remote Script 新语法示例
+# 从 Loon build 988 开始支持新的 Script 语法。
+# 本文件由 RemoteScript_Example.plist 转换，保留原有匹配规则、脚本地址和执行时机。
+# 作为 [Remote Script] 订阅使用，本文件不需要添加 [Script] 段名。
+# HTTP 脚本格式：request|response if <条件> then script("脚本地址") with <选项>
+# /pattern/i 表示忽略大小写，与原有 HTTP Script 的匹配行为保持一致。
+# requires_body=true 对应旧语法 requires-body=1，表示脚本需要读取正文。
+# HTTPS 脚本需要开启 MITM，并安装、信任证书；下方 hostname 保留原文件的域名配置。
+# 脚本仍引用原文件中的第三方资源，实际效果取决于脚本可用性及对应服务的接口变化。
+hostname = api.weibo.cn, mapi.weibo.com, *.uve.weibo.com, ios.prod.ftl.netflix.com, api.m.jd.com
+
+# 微博信息流：在响应阶段读取正文，交给原 wb_ad.js 脚本处理。
+response if ${url} ~= /^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(statuses\/(unread|extend|positives\/get|(friends|video)(\/|_)timeline)|stories\/(video_stream|home_list)|(groups|fangle)\/timeline|profile\/statuses|comments\/build_comments|photo\/recommend_list|service\/picfeed|searchall|cardlist|page|\!\/photos\/pic_recommend_status)/i then script("https://raw.githubusercontent.com/yichahucha/surge/master/wb_ad.js") with requires_body=true
+
+# 微博开屏：匹配广告接口，在响应阶段读取正文并执行原 wb_launch.js 脚本。
+response if ${url} ~= /^https?:\/\/(sdk|wb)app\.uve\.weibo\.com(\/interface\/sdk\/sdkad.php|\/wbapplua\/wbpullad.lua)/i then script("https://raw.githubusercontent.com/yichahucha/surge/master/wb_launch.js") with requires_body=true
+
+# Netflix 评分（请求阶段）：保留原请求脚本，不要求读取请求正文。
+request if ${url} ~= /^https?:\/\/ios\.prod\.ftl\.netflix\.com\/iosui\/user\/.+path=%5B%22videos%22%2C%\d+%22%2C%22summary%22%5D/i then script("https://raw.githubusercontent.com/yichahucha/surge/master/nf_rating.js")
+
+# Netflix 评分（响应阶段）：与上面的请求脚本配套，读取响应正文后执行同一脚本。
+response if ${url} ~= /^https?:\/\/ios\.prod\.ftl\.netflix\.com\/iosui\/user\/.+path=%5B%22videos%22%2C%\d+%22%2C%22summary%22%5D/i then script("https://raw.githubusercontent.com/yichahucha/surge/master/nf_rating.js") with requires_body=true
+
+# 京东价格：匹配 wareBusiness 或 serverConfig 接口，在响应阶段读取正文并执行原 jd_price.js 脚本。
+response if ${url} ~= /^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(wareBusiness|serverConfig)/i then script("https://raw.githubusercontent.com/yichahucha/surge/master/jd_price.js") with requires_body=true
+
+# 定时签到：保留原五段 Cron 表达式，每周一至周五的 09:00 和 18:00 执行。
+cron "0 9,18 * * 1-5" then script("https://raw.githubusercontent.com/yichahucha/surge/master/check_in.js")

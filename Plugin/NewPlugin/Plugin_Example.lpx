@@ -1,0 +1,19 @@
+# 新语法版本：Loon build 988 及以上；由 Plugin_Example.plugin 转换。
+#!name= Loon example plugin1
+#!desc= Netflix评分
+#!author= Loon0x00
+#!homepage= https://github.com/Loon0x00
+#!date = 2023-08-14 16:47:00
+#!icon= https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Netflix.png
+
+[Rewrite]
+request if ${url} ~= /^https?:\/\/(www.)?g.cn/i then redirect(302, "https://www.google.com")
+request if ${url} ~= /^https?:\/\/(www.)?google.cn/i then redirect(302, "https://www.google.com")
+request if ${url} ~= /^https?:\/\/union.click.jd.com\/jda?/i then url.replace("http://union.click.jd.com/jda?adblock=")
+
+[Script]
+request if ${url} ~= /^https?:\/\/ios\.prod\.ftl\.netflix\.com\/iosui\/user\/.+path=%5B%22videos%22%2C%\d+%22%2C%22summary%22%5D/i then script("https://raw.githubusercontent.com/yichahucha/surge/master/nf_rating.js")
+response if ${url} ~= /^https?:\/\/ios\.prod\.ftl\.netflix\.com\/iosui\/user\/.+path=%5B%22videos%22%2C%\d+%22%2C%22summary%22%5D/i then script("https://raw.githubusercontent.com/yichahucha/surge/master/nf_rating.js") with requires_body=true
+
+[MITM]
+hostname = ios.prod.ftl.netflix.com

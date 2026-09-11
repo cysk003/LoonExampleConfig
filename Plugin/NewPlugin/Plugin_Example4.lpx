@@ -1,0 +1,13 @@
+# 新语法版本：Loon build 988 及以上；由 Plugin_Example4.plugin 转换。
+#!name= Loon example plugin4
+#!desc= 这是一个带有配置项的插件，input代表输入，select代表选择（select的第一项为名称，后面为可选值），用户所填或者选择的值都可以在脚本中用$persistentStore.read进行读取，如$persistentStore.read(appName)
+#!author = Loon0x00
+#!input = appName
+#!input = author
+#!select = appType,tool,social,health,sport
+#!select = price,0.99,1.99,4.99
+
+# 保留 #!input / #!select：原脚本通过 $persistentStore.read 读取这些配置项。
+# 它们不是传入 $argument 的 [Argument] 参数，不改变原脚本的数据读取方式。
+[Script]
+cron "0/24 * * * *" then script("https://raw.githubusercontent.com/Loon0x00/LoonExampleConfig/master/Script/plugin_example.js") with tag="pluginExample", enable=true
