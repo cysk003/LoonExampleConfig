@@ -1,0 +1,39 @@
+# Loon subscription test fixture
+# 仅用于验证订阅 DNS、Host Map 和节点配置的解析及优先级。
+# 3.5.2(997) 以及后续的版本才支持，之前的版本不能解析 DNS、Host
+
+[DNS]
+# 普通 DNS（DoU）
+dns-server = 223.5.5.5,1.1.1.1
+# DNS over HTTPS（DoH）
+doh-server = https://dns.google/dns-query
+# DNS over QUIC（DoQ）
+doq-server = quic://dns.adguard-dns.com
+# DNS over HTTP/3（DoH3）
+doh3-server = h3://dns.google/dns-query
+
+[Host]
+# 固定 IPv4：此映射应优先于节点 DNS 和订阅 DNS。
+hostmap-node.test = 192.0.2.10
+# 固定 IPv6。
+ipv6-node.test = 2001:db8::10
+# 域名别名。
+alias-node.test = hostmap-node.test
+# 为域名指定 DNS：此配置应优先于节点自己的 server-dns。
+dns-map-node.test = server:https://dns.cloudflare.com/dns-query
+# 为 SSID 指定 DNS。
+ssid:Loon-Test-WiFi = server:1.0.0.1
+# 为域名指定 IP 栈。
+ipv4-only-node.test = ip-mode:ipv4-only
+# IP 到 IP 映射。
+198.51.100.10 = 192.0.2.20
+
+[Proxy]
+# 命中 [Host] 固定 IP。
+HostMap-IP-Node = shadowsocks,hostmap-node.test,8388,aes-128-gcm,"test-password",udp=true
+# 没有节点 server-dns，使用订阅 [DNS]。
+Subscription-DNS-Node = shadowsocks,subscription-dns-node.test,8388,aes-128-gcm,"test-password",udp=true
+# 节点单独指定多个 DNS，优先于订阅 [DNS]。
+Inline-DNS-Node = shadowsocks,inline-dns-node.test,8388,aes-128-gcm,"test-password",udp=true,server-dns="9.9.9.9,https://dns.quad9.net/dns-query"
+# [Host] 指定 DNS 应优先于下面的节点 server-dns。
+HostMap-DNS-Node = shadowsocks,dns-map-node.test,8388,aes-128-gcm,"test-password",udp=true,server-dns="8.8.8.8,https://dns.google/dns-query"
